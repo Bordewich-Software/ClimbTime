@@ -1,0 +1,88 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+    subscription: Subscription
+}
+
+interface Error {
+    message: String!
+}
+
+union CreateStopWatchError = StopwatchExistsError
+
+type CreateStopWatchPayload {
+    boolean: Boolean
+    errors: [CreateStopWatchError!]
+}
+
+type Mutation {
+    createStopWatch(input: CreateStopWatchInput!): CreateStopWatchPayload!
+    removeStopwatch(input: RemoveStopwatchInput!): RemoveStopwatchPayload!
+    reset(input: ResetInput!): ResetPayload!
+    restart(input: RestartInput!): RestartPayload!
+    toggle(input: ToggleInput!): TogglePayload!
+}
+
+type Query {
+    currentStopwatches: [String!]!
+    elapsedTime(id: String!): StopWatchState!
+}
+
+type RemoveStopwatchPayload {
+    boolean: Boolean
+}
+
+type ResetPayload {
+    timerState: TimerState
+}
+
+type RestartPayload {
+    timerState: TimerState
+}
+
+type StopWatchState {
+    minutes: Int!
+    seconds: Int!
+    timerState: TimerState!
+}
+
+type StopwatchExistsError implements Error {
+    message: String!
+}
+
+type Subscription {
+    elapsedTime(id: String!): StopWatchState!
+}
+
+type TogglePayload {
+    timerState: TimerState
+}
+
+enum TimerState {
+    NOT_SET
+    PAUSED
+    STARTED
+    STOPPED
+}
+
+input CreateStopWatchInput {
+    id: String!
+}
+
+input RemoveStopwatchInput {
+    id: String!
+}
+
+input ResetInput {
+    id: String!
+}
+
+input RestartInput {
+    id: String!
+}
+
+input ToggleInput {
+    id: String!
+}
