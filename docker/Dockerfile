@@ -16,6 +16,7 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+COPY .env.docker-compose .env.production
 # This will do the trick, use the corresponding env file for each environment.
 RUN npm run build
 
@@ -23,12 +24,8 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-# Set env variables
-ARG owner
-ENV env_name $owner
-
 # Link repostitory
-LABEL org.opencontainers.image.source=https://github.com/${owner}/ClimbTime
+LABEL org.opencontainers.image.source=https://github.com/bordewich-software/ClimbTime
 LABEL org.opencontainers.image.description="ClimbTime Next Server"
 
 ENV NODE_ENV=production
