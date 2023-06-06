@@ -1,12 +1,12 @@
 import * as React from "react";
+import {useState} from "react";
 import Button from "@mui/material/Button";
 import {gql, useMutation, useQuery} from "@apollo/client";
-import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import {useRouter} from "next/router";
 import difference from "lodash/difference";
 import sortBy from "lodash/sortBy";
-
+import {Grid, TextField} from "@mui/material";
 
 
 const EXISTING_TIMERS = gql`
@@ -38,30 +38,44 @@ export default function Home() {
 
     const router = useRouter();
 
+    const defaultMinutes = 6;
+    const defaultSeconds = 0;
+    let [minutes, setMinutes] = useState<number>(defaultMinutes);
+    let [seconds, setSeconds] = useState<number>(defaultSeconds);
+
     const createNewStopwatch = async (id: string) => {
-        await createStopwatch({variables: {input: {id}}})
-        await router.replace(`/timer/${id}`, undefined, {shallow: true});
+        await createStopwatch({variables: {input: {id, minutes, seconds}}})
+        await router.replace(`/timer/${id}?minutes=${minutes}&seconds=${seconds}`, undefined, {shallow: true});
     }
 
     const navigateToTimer = async (id: string) => await router.push(`/timer/${id}`);
 
     const currentStopwatches = data?.currentStopwatches;
     const currentTimerIds: string[] = sortBy(currentStopwatches ?? []);
-    const hasStopwatches = currentTimerIds.length >= 0;
+    const hasStopwatches = currentTimerIds.length > 0;
 
     const nextTimerIds = difference(AllowedTimerIds, currentTimerIds).sort();
     const nextTimerId = nextTimerIds.length > 0 ? nextTimerIds[0] : "";
 
-    if (data?.currentStopwatches == null || data?.currentStopwatches === 0) {
-        return <Box>
-            <Typography>{"There are currently no existing stopwatches. Click the button to create a new one"}</Typography>
-            <Button onClick={() => createNewStopwatch("1")}>{"Add new timer"}</Button>
-        </Box>
-    }
+    return (<Grid container direction={"column"} alignItems={"center"} rowGap={2}>
 
-    return (<Box>
-        {!hasStopwatches && <Typography>{"There are currently no existing stopwatches. Click the button to create a new one"}</Typography>}
-        {currentTimerIds.map((id: string) => (<Button variant={"contained"} key={`go-to-timer-button-${id}`} onClick={() => navigateToTimer(id)}>{`Go to timer ${id}`}</Button>))}
-        {nextTimerId !== "" && <Button key={"create-new-timer"} onClick={() => createNewStopwatch(nextTimerId)}>{"Add new timer"}</Button>}
-    </Box>);
+        {!hasStopwatches &&
+            <Typography>{"There are currently no existing stopwatches. Click 'Add new timer' to create a new one"}</Typography>}
+
+        {currentTimerIds.map((id: string) => (<Grid key={id} item><Button variant={"contained"} key={`go-to-timer-button-${id}`}
+                                                                 onClick={() => navigateToTimer(id)}>{`Go to timer ${id}`}</Button></Grid>))}
+
+        {nextTimerId !== "" &&
+            <Grid pt={20} container direction={"row"} alignItems={"center"} justifyContent={"center"}>
+                <TextField id="minutes" label="Minutes" type={"number"}
+                           onChange={(v) => setMinutes(+v.target.value)}
+                           value={minutes}/>
+                <TextField id="seconds" label="Seconds" type={"number"}
+                           onChange={(v) => setSeconds(+v.target.value)}
+                           value={seconds}/>
+                <Button key={"create-new-timer"}
+                        onClick={() => createNewStopwatch(nextTimerId)}>{"Add new timer"}</Button>
+            </Grid>}
+
+    </Grid>);
 }

@@ -58,6 +58,8 @@ export default function Id() {
 
     const router = useRouter();
     const timerId = router.query.id;
+    const minutes = router.query.minutes ? +router.query.minutes : 0;
+    const seconds = router.query.seconds ? +router.query.seconds : 0;
     const {data, error, loading} = useSubscription(TIMER_SUBSCRIPTION, {
         variables: {
             id: timerId
@@ -95,11 +97,12 @@ export default function Id() {
 
     const isTimerRunning = data?.elapsedTime.timerState === "STARTED";
 
-    const minutes = data?.elapsedTime.minutes ?? 0;
-    const seconds = data?.elapsedTime.seconds ?? 0;
-    const totalTime = minutes + (seconds / 60);
+    const remainingMinutes = data?.elapsedTime.minutes ?? 0;
+    const remainingSeconds = data?.elapsedTime.seconds ?? 0;
+    const totalTime = remainingMinutes + (remainingSeconds / 60);
+    const currentDuration = minutes + (seconds / 60);
 
-    const timerProgress = (totalTime * 100) / 6;
+    const timerProgress = (totalTime * 100) / currentDuration;
 
     return (
         <Grid container direction={"column"} sx={{height: '100%', pb: 1, pt: 0}} justifyContent={"space-between"}

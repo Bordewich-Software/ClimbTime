@@ -69,6 +69,8 @@ enum TimerState {
 
 input CreateStopWatchInput {
     id: String!
+    minutes: Int!
+    seconds: Int!
 }
 
 input RemoveStopwatchInput {
