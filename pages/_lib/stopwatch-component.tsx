@@ -48,16 +48,17 @@ const RESET_TIMER = gql`
 
 export default function StopwatchComponent(props: Props) {
 
+    const id = props?.stopwatch?.id ?? "";
     const {data} = useQuery(STOPWATCH_CONFIG, {
         variables: {
-            id: props.stopwatch.id
+            id
         }
     })
 
     const [toggleTimer, {error: startTimerError}] = useMutation(TOGGLE_TIMER, {
         variables: {
             input: {
-                id: props.stopwatch.id
+                id
             }
         }
     });
@@ -65,14 +66,14 @@ export default function StopwatchComponent(props: Props) {
     const [resetTimer, {error: resetTimerError}] = useMutation(RESET_TIMER, {
         variables: {
             input: {
-                id: props.stopwatch.id
+                id
             }
         }
     });
 
     if (data?.stopwatchConfig == null) {
         return (
-            <Typography>{`Oh no, the stopwatch with id: ${props.stopwatch.id} does not seem to exists. Try the go-back button, and see if you need to create a new stopwatch`}</Typography>)
+            <Typography>{`Oh no, the stopwatch with id: ${id} does not seem to exists. Try the go-back button, and see if you need to create a new stopwatch`}</Typography>)
     }
 
     if (startTimerError)
