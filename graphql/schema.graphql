@@ -26,9 +26,8 @@ type Mutation {
 }
 
 type Query {
-    elapsedTime(id: String!): StopWatchState!
+    stopwatchConfig(id: String!): StopwatchConfig
     stopwatchConfigs: [StopwatchConfig!]!
-    stopwatchIds: [String!]!
 }
 
 type RemoveStopwatchPayload {

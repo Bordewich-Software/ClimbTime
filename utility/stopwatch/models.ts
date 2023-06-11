@@ -2,7 +2,7 @@ import {TimeSpan} from "./format-stopwatch-time";
 
 export type StopwatchFormat = "HOURS" | "MINUTES";
 
-export type Stopwatch = { id: string, stopwatchFormat: StopwatchFormat, timeSpan: TimeSpan };
+export type Stopwatch = { id: string, timeSpan: TimeSpan };
 
 export type StopwatchConfig = {
     id: string,
