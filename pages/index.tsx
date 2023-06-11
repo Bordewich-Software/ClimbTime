@@ -7,7 +7,7 @@ import {useRouter} from "next/router";
 import difference from "lodash/difference";
 import sortBy from "lodash/sortBy";
 import {Grid, TextField} from "@mui/material";
-import {Stopwatch, StopwatchConfig, StopwatchFormat} from "../utility/stopwatch/models";
+import {StopwatchFormat} from "../utility/stopwatch/models";
 import {TimeSpan} from "../utility/stopwatch/format-stopwatch-time";
 
 
