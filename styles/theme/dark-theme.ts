@@ -1,6 +1,6 @@
 import * as React from "react";
 import {Roboto} from 'next/font/google';
-import {createTheme} from '@mui/material/styles';
+import {createTheme, responsiveFontSizes} from '@mui/material/styles';
 import {red} from '@mui/material/colors';
 
 export const roboto = Roboto({
@@ -11,7 +11,7 @@ export const roboto = Roboto({
 });
 
 // Create a theme instance.
-const darkTheme = createTheme({
+const theme = createTheme({
     palette: {
         mode: "dark",
         primary: {
@@ -29,38 +29,61 @@ const darkTheme = createTheme({
     }
 });
 
-darkTheme.typography.timer = {
+theme.typography.minuteTimer = {
+    ...theme.typography.h1,
     fontSize: '9.5rem',
-    [darkTheme.breakpoints.up('sm')]: {
+    [theme.breakpoints.up('sm')]: {
         fontSize: '15rem',
     },
-    [darkTheme.breakpoints.up('md')]: {
+    [theme.breakpoints.up('md')]: {
         fontSize: '22.5rem',
     },
-    [darkTheme.breakpoints.up('lg')]: {
+    [theme.breakpoints.up('lg')]: {
         fontSize: '27rem',
     },
-    [darkTheme.breakpoints.up('xl')]: {
+    [theme.breakpoints.up('xl')]: {
         fontSize: '30rem',
+    },
+};
+
+theme.typography.hourTimer = {
+    ...theme.typography.h1,
+    fontSize: '5.5rem',
+    [theme.breakpoints.up('sm')]: {
+        fontSize: '9rem',
+    },
+    [theme.breakpoints.up('md')]: {
+        fontSize: '15rem',
+    },
+    [theme.breakpoints.up('lg')]: {
+        fontSize: '19rem',
+    },
+    [theme.breakpoints.up('xl')]: {
+        fontSize: '25rem',
     },
 };
 
 declare module '@mui/material/styles' {
     interface TypographyVariants {
-        timer: React.CSSProperties;
+        minuteTimer: React.CSSProperties;
+        hourTimer: React.CSSProperties;
     }
 
     // allow configuration using `createTheme`
     interface TypographyVariantsOptions {
-        timer?: React.CSSProperties;
+        minuteTimer?: React.CSSProperties;
+        hourTimer?: React.CSSProperties;
     }
 }
 
 // Update the Typography's variant prop options
 declare module '@mui/material/Typography' {
     interface TypographyPropsVariantOverrides {
-        timer: true;
+        minuteTimer: true;
+        hourTimer: true;
     }
 }
+
+const darkTheme = responsiveFontSizes(theme);
 
 export default darkTheme;

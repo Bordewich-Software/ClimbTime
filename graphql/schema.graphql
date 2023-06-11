@@ -26,8 +26,9 @@ type Mutation {
 }
 
 type Query {
-    currentStopwatches: [String!]!
     elapsedTime(id: String!): StopWatchState!
+    stopwatchConfigs: [StopwatchConfig!]!
+    stopwatchIds: [String!]!
 }
 
 type RemoveStopwatchPayload {
@@ -43,9 +44,18 @@ type RestartPayload {
 }
 
 type StopWatchState {
+    hours: Int!
     minutes: Int!
     seconds: Int!
     timerState: TimerState!
+}
+
+type StopwatchConfig {
+    format: StopwatchFormat!
+    hours: Int!
+    id: String!
+    minutes: Int!
+    seconds: Int!
 }
 
 type StopwatchExistsError implements Error {
@@ -54,10 +64,17 @@ type StopwatchExistsError implements Error {
 
 type Subscription {
     elapsedTime(id: String!): StopWatchState!
+    remainingTime(id: String!): StopWatchState!
 }
 
 type TogglePayload {
     timerState: TimerState
+}
+
+enum StopwatchFormat {
+    HOURS
+    MINUTES
+    NOT_SET
 }
 
 enum TimerState {
@@ -68,6 +85,8 @@ enum TimerState {
 }
 
 input CreateStopWatchInput {
+    format: StopwatchFormat!
+    hours: Int!
     id: String!
     minutes: Int!
     seconds: Int!
