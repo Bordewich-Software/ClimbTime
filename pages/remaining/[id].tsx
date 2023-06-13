@@ -33,10 +33,10 @@ export default function Id() {
     const timerState = data?.remainingTime.timerState
 
     useEffect(() => {
-        if (remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 3) {
+        if (remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 2) {
             const tick = new Audio("/tick.mp3")
             const horn = new Audio("/airhorn.mp3")
-            if ([1, 2, 3].includes(remainingSeconds))
+            if ([0, 1, 2].includes(remainingSeconds))
                 tick.play().finally()
             if (remainingSeconds <= 0 && timerState === "STOPPED")
                 horn.play().finally()
