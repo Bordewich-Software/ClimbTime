@@ -8,7 +8,7 @@ import difference from "lodash/difference";
 import sortBy from "lodash/sortBy";
 import {Grid, TextField} from "@mui/material";
 import {StopwatchFormat} from "../utility/stopwatch/models";
-import {TimeSpan} from "../utility/stopwatch/format-stopwatch-time";
+import {formatFor, TimeSpan} from "../utility/stopwatch/format-stopwatch-time";
 
 
 const EXISTING_TIMERS = gql`
@@ -77,25 +77,22 @@ export default function Home() {
     const nextTimerIds = difference(AllowedTimerIds, currentTimerIds).sort();
     const nextTimerId = nextTimerIds.length > 0 ? nextTimerIds[0] : "";
 
-    return (<Grid container direction={"column"} alignItems={"center"} rowGap={2}>
+    return (<Grid container direction={"column"} alignItems={"center"} justifyContent={"center"} rowGap={2}>
         {!hasStopwatches &&
             <Typography>{"There are currently no existing stopwatches. Click 'Add new timer' to create a new one"}</Typography>}
 
         {stopwatchConfigs.map((sc) => (
-            <Grid key={sc.id} item container direction={"row"} alignItems={"center"} justifyContent={"center"} columnSpacing={2}>
-                <Grid item>
+            <Grid key={sc.id} item container direction={"row"} alignItems={"center"} justifyContent={"center"} columnGap={1}>
+                    <Typography>{`Timer ${sc.id} - ${formatFor(sc.stopwatchFormat, {hours: sc.hours, minutes: sc.minutes, seconds: sc.seconds})}`}</Typography>
                     <Button variant={"contained"} key={`go-to-remaining-timer-button-${sc.id}`}
-                            onClick={() => navigateToRemainingTimer(sc.id)}>{`Count down stopwatch ${sc.id}`}</Button>
-                </Grid>
-                <Grid item>
+                            onClick={() => navigateToRemainingTimer(sc.id)}>{`Up`}</Button>
                     <Button variant={"contained"} key={`go-to-elapsed-timer-button-${sc.id}`}
-                            onClick={() => navigateToElapsedTimer(sc.id)}>{`Count up stopwatch ${sc.id}`}</Button>
-                </Grid>
+                            onClick={() => navigateToElapsedTimer(sc.id)}>{`Down`}</Button>
             </Grid>
         ))}
 
         {nextTimerId !== "" &&
-            <Grid pt={20} container alignItems={"center"} direction={"column"} rowGap={3} justifyContent={"center"}>
+            <Grid pt={5} container alignItems={"center"} direction={"column"} rowGap={3} justifyContent={"center"}>
                 <Button key={"create-new-minutes-timer"}
                         onClick={() => createNewStopwatch(nextTimerId, defaultLeadTimer, "MINUTES", "Remaining")}>{"Add new lead climb stopwatch (6 minutes)"}</Button>
                 <Button key={"create-new-hours-timer"}

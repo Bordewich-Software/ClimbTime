@@ -35,8 +35,8 @@ export default function MyApp(props: MyAppProps) {
                         <CssBaseline/>
                         <Box component={"header"}
                              sx={{
-                                 py: 3,
-                                 px: 2,
+                                 py: 1,
+                                 px: 1,
                                  backgroundColor: (theme) =>
                                      theme.palette.mode === 'light'
                                          ? theme.palette.grey[200]
@@ -54,8 +54,8 @@ export default function MyApp(props: MyAppProps) {
                         <Box
                             component="footer"
                             sx={{
-                                py: 3,
-                                px: 2,
+                                py: 1,
+                                px: 1,
                                 mt: 'auto',
                                 backgroundColor: (theme) =>
                                     theme.palette.mode === 'light'
@@ -63,7 +63,7 @@ export default function MyApp(props: MyAppProps) {
                                         : theme.palette.grey[800],
                             }}
                         >
-                            <Container maxWidth="sm">
+                            <Container>
                                 <Copyright/>
                             </Container>
                         </Box>
