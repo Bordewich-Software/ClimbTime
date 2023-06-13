@@ -9,6 +9,8 @@ import sortBy from "lodash/sortBy";
 import {Grid, TextField} from "@mui/material";
 import {StopwatchFormat} from "../utility/stopwatch/models";
 import {formatFor, TimeSpan} from "../utility/stopwatch/format-stopwatch-time";
+import { GetServerSidePropsContext } from "next";
+import { getSession } from "next-auth/react";
 
 
 const EXISTING_TIMERS = gql`
@@ -124,3 +126,22 @@ export default function Home() {
 
     </Grid>);
 }
+
+export const getServerSideProps = async (
+    context: GetServerSidePropsContext
+  ) => {
+    const session = await getSession({ req: context.req });
+  
+    if (!session) {
+      return {
+        redirect: {
+          destination: '/api/auth/signin',
+          permanent: false,
+        },
+      };
+    }
+  
+    return {
+      props: { session },
+    };
+  };
