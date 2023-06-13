@@ -46,9 +46,9 @@ export default function Id() {
         };
         if (remainingHours === 0 && remainingMinutes === 0) {
             if ([1, 2, 3].includes(remainingSeconds))
-                playAudio(audioTickRef)
+                playAudio(audioTickRef).finally()
             if (remainingSeconds <= 0 && timerState === "STOPPED")
-                playAudio(audioTimesUpRef)
+                playAudio(audioTimesUpRef).finally()
         }
     }, [remainingHours, remainingMinutes, remainingSeconds, timerState])
 
