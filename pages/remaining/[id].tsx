@@ -1,10 +1,10 @@
+import React, {useEffect, useRef} from "react";
 import Typography from "@mui/material/Typography";
 import {gql, useSubscription} from "@apollo/client";
 import {useRouter} from "next/router";
 import {Stopwatch} from "../../utility/stopwatch/models";
 import StopwatchComponent from "../_lib/stopwatch-component";
 
-import {useEffect} from "react";
 
 const REMAINING_TIMER_SUBSCRIPTION = gql`
     subscription RemainingTimeSubscription($id: String!) {
@@ -32,14 +32,25 @@ export default function Id() {
     const remainingSeconds = data?.remainingTime.seconds ?? 0;
     const timerState = data?.remainingTime.timerState
 
+    const tickingAudioRef = useRef<HTMLAudioElement | null>(null);
+    const hornAudioRef = useRef<HTMLAudioElement | null>(null);
+
     useEffect(() => {
-        if (remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 2) {
-            const tick = new Audio("/tick.mp3")
-            const horn = new Audio("/airhorn.mp3")
-            if ([0, 1, 2].includes(remainingSeconds))
-                tick.play().finally()
-            if (remainingSeconds <= 0 && timerState === "STOPPED")
-                horn.play().finally()
+        const tick = new Audio("/tick.mp3")
+        const horn = new Audio("/airhorn.mp3")
+
+        tickingAudioRef.current = tick;
+        hornAudioRef.current = horn;
+        // Play tick the last 3 seconds
+        if (timerState === "STARTED" && remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 3) {
+            tick.play().catch(console.log);
+        }
+
+        // Play horn sound when countdown is complete
+        if (timerState === "STARTED" && remainingHours === 0 && remainingMinutes === 0 && remainingSeconds === 0) {
+            tick.pause(); // Stop the ticking sound
+            tick.currentTime = 0; // Reset the ticking sound
+            horn.play().catch(console.log);
         }
     }, [remainingHours, remainingMinutes, remainingSeconds, timerState])
 
