@@ -17,7 +17,7 @@ export default function Copyright() {
                 </Grid>
                 <Grid item>
                     <Typography variant="body2" color="text.secondary">
-                        {'John A. Fossum'}
+                        {'John A. Fossum & Erling Neset'}
                     </Typography>
                     <Image src={skalleLogo} alt={"skalle"} height={40}/>
                 </Grid>
