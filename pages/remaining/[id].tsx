@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {MutableRefObject, useEffect, useRef} from "react";
 import Typography from "@mui/material/Typography";
 import {gql, useSubscription} from "@apollo/client";
 import {useRouter} from "next/router";
@@ -12,7 +12,7 @@ const REMAINING_TIMER_SUBSCRIPTION = gql`
             hours
             minutes
             seconds
-            timerState
+            stopwatchState: timerState
         }
     }
 `;
@@ -36,21 +36,23 @@ export default function Id() {
     const hornAudioRef = useRef<HTMLAudioElement | null>(null);
 
     useEffect(() => {
-        const tick = new Audio("/tick.mp3")
-        const horn = new Audio("/airhorn.mp3")
-
-        tickingAudioRef.current = tick;
-        hornAudioRef.current = horn;
         // Play tick the last 3 seconds
-        if (stopwatchState === "STARTED" && remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 3) {
-            tick.play().catch(console.log);
+        if (stopwatchState === "STARTED" && remainingHours === 0 && remainingMinutes === 0 && remainingSeconds <= 3 && tickingAudioRef.current != null) {
+            tickingAudioRef.current.pause(); // Stop the ticking sound
+            tickingAudioRef.current.currentTime = 0; // Reset the ticking sound
+            tickingAudioRef.current.play().catch(console.log);
         }
 
         // Play horn sound when countdown is complete
-        if (stopwatchState === "STARTED" && remainingHours === 0 && remainingMinutes === 0 && remainingSeconds === 0) {
-            tick.pause(); // Stop the ticking sound
-            tick.currentTime = 0; // Reset the ticking sound
-            horn.play().catch(console.log);
+        if (stopwatchState === "STARTED"
+            && remainingHours === 0
+            && remainingMinutes === 0
+            && remainingSeconds === 0
+            && tickingAudioRef.current != null
+            && hornAudioRef.current != null) {
+            tickingAudioRef.current.pause(); // Stop the ticking sound
+            tickingAudioRef.current.currentTime = 0; // Reset the ticking sound
+            hornAudioRef.current.play().catch(console.log);
         }
     }, [remainingHours, remainingMinutes, remainingSeconds, stopwatchState])
 
@@ -70,6 +72,8 @@ export default function Id() {
     }
 
     return (<>
+        <audio ref={tickingAudioRef} src={"/tick.mp3"} preload={"auto"} />
+        <audio ref={hornAudioRef} src={"/airhorn.mp3"} preload={"auto"} />
         <StopwatchComponent stopwatch={stopwatch} stopwatchState={stopwatchState}/>
     </>)
 }
