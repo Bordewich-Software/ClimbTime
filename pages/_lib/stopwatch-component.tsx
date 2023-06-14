@@ -15,7 +15,7 @@ import {gql, useMutation, useQuery} from "@apollo/client";
 
 type Props = {
     stopwatch: Stopwatch;
-    timerState: "STARTED" | "STOPPED";
+    stopwatchState: "STARTED" | "STOPPED";
 }
 
 const STOPWATCH_CONFIG = gql`
@@ -30,16 +30,16 @@ const STOPWATCH_CONFIG = gql`
     }
 `;
 
-const TOGGLE_TIMER = gql`
-    mutation ToggleTimer($input: ToggleInput!) {
+const TOGGLE_STOPWATCH = gql`
+    mutation ToggleStopwatch($input: ToggleInput!) {
         toggle(input: $input) {
             timerState
         }
     }
 `;
 
-const RESET_TIMER = gql`
-    mutation ResetTimer($input: ResetInput!) {
+const RESET_STOPWATCH = gql`
+    mutation ResetStopwatch($input: ResetInput!) {
         reset(input: $input) {
             timerState
         }
@@ -55,7 +55,7 @@ export default function StopwatchComponent(props: Props) {
         }
     })
 
-    const [toggleTimer, {error: startTimerError}] = useMutation(TOGGLE_TIMER, {
+    const [toggleStopwatch, {error: startStopwatchError}] = useMutation(TOGGLE_STOPWATCH, {
         variables: {
             input: {
                 id
@@ -63,7 +63,7 @@ export default function StopwatchComponent(props: Props) {
         }
     });
 
-    const [resetTimer, {error: resetTimerError}] = useMutation(RESET_TIMER, {
+    const [resetStopwatch, {error: resetStopwatchError}] = useMutation(RESET_STOPWATCH, {
         variables: {
             input: {
                 id
@@ -76,13 +76,13 @@ export default function StopwatchComponent(props: Props) {
             <Typography>{`Oh no, the stopwatch with id: ${id} does not seem to exists. Try the go-back button, and see if you need to create a new stopwatch`}</Typography>)
     }
 
-    if (startTimerError)
-        return (<Typography>{`Oh no, an error occured: ${startTimerError?.message}`}</Typography>)
+    if (startStopwatchError)
+        return (<Typography>{`Oh no, an error occured: ${startStopwatchError?.message}`}</Typography>)
 
-    if (resetTimerError)
-        return (<Typography>{`Oh no, an error occured: ${resetTimerError?.message}`}</Typography>)
+    if (resetStopwatchError)
+        return (<Typography>{`Oh no, an error occured: ${resetStopwatchError?.message}`}</Typography>)
 
-    const timerState = props.timerState;
+    const stopwatchState = props.stopwatchState;
 
     const swConfig = data.stopwatchConfig;
     const stopwatchFormat = swConfig?.format ?? "MINUTES";
@@ -96,7 +96,7 @@ export default function StopwatchComponent(props: Props) {
 
     const elapsedTime = formatFor(stopwatchFormat, timeSpan);
 
-    const isTimerRunning = timerState === "STARTED";
+    const isStopwatchRunning = stopwatchState === "STARTED";
 
     const remainingHours = timeSpan.hours;
     const remainingMinutes = timeSpan.minutes;
@@ -113,7 +113,7 @@ export default function StopwatchComponent(props: Props) {
               alignItems={"center"}>
             <Grid item>
                 <Button id={"reset-timer-button"} name={"reset-timer-button"} type={"button"}
-                        onClick={() => resetTimer()}>{"Reset"}</Button>
+                        onClick={() => resetStopwatch()}>{"Reset"}</Button>
             </Grid>
 
             <Grid item pt={4} sx={{width: '100%'}}>
@@ -125,10 +125,10 @@ export default function StopwatchComponent(props: Props) {
             </Grid>
 
             <Grid item justifyContent={"flex-end"} p={0}>
-                {!isTimerRunning && <IconButton onClick={() => toggleTimer()}>
+                {!isStopwatchRunning && <IconButton onClick={() => toggleStopwatch()}>
                     <PlayCircleOutlineIcon color={"success"} sx={{fontSize: 90}}></PlayCircleOutlineIcon>
                 </IconButton>}
-                {isTimerRunning && <IconButton onClick={() => toggleTimer()}>
+                {isStopwatchRunning && <IconButton onClick={() => toggleStopwatch()}>
                     <PauseCircleFilledIcon sx={{color: pink[500], fontSize: 90}}></PauseCircleFilledIcon>
                 </IconButton>}
             </Grid>

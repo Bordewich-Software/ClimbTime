@@ -1,7 +1,7 @@
 import * as React from "react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Button from "@mui/material/Button";
-import {gql, useMutation, useQuery} from "@apollo/client";
+import {gql, useLazyQuery, useMutation} from "@apollo/client";
 import Typography from "@mui/material/Typography";
 import {useRouter} from "next/router";
 import difference from "lodash/difference";
@@ -9,12 +9,12 @@ import sortBy from "lodash/sortBy";
 import {Grid, TextField} from "@mui/material";
 import {StopwatchFormat} from "../utility/stopwatch/models";
 import {formatFor, TimeSpan} from "../utility/stopwatch/format-stopwatch-time";
-import { GetServerSidePropsContext } from "next";
-import { getSession } from "next-auth/react";
+import {GetServerSidePropsContext} from "next";
+import {getSession} from "next-auth/react";
 
 
-const EXISTING_TIMERS = gql`
-    query ExistingTimers {
+const EXISTING_STOPWATCHES = gql`
+    query ExistingStopwatches {
         stopwatchConfigs {
             id
             hours
@@ -25,8 +25,8 @@ const EXISTING_TIMERS = gql`
     }
 `;
 
-const CREATE_TIMER = gql`
-    mutation AddTimer($input: CreateStopWatchInput!) {
+const CREATE_STOPWATCH = gql`
+    mutation CreateStopwatch($input: CreateStopWatchInput!) {
         createStopWatch(input: $input) {
             boolean
             errors {
@@ -38,20 +38,23 @@ const CREATE_TIMER = gql`
     }
 `;
 
-const AllowedTimerIds = ["1", "2", "3", "4", "5", "6"];
+const AllowedStopwatchIds = ["1", "2", "3", "4", "5", "6"];
 
 type StopwatchType = "Remaining" | "Elapsed";
 
 export default function Home() {
+    const [fetchStopwatches, {data, error}] = useLazyQuery(EXISTING_STOPWATCHES, {fetchPolicy: "cache-and-network"});
 
-    const {data, error} = useQuery(EXISTING_TIMERS);
-
-    const [createStopwatch, {error: createError}] = useMutation(CREATE_TIMER);
+    const [createStopwatch, {error: createError}] = useMutation(CREATE_STOPWATCH);
 
     const router = useRouter();
 
-    const defaultBoulderTimer: TimeSpan = {hours: 2, minutes: 30, seconds: 0};
-    const defaultLeadTimer: TimeSpan = {hours: 0, minutes: 6, seconds: 0};
+    useEffect(() => {
+        fetchStopwatches()
+    }, [fetchStopwatches])
+
+    const defaultBoulderStopwatch: TimeSpan = {hours: 2, minutes: 30, seconds: 0};
+    const defaultLeadStopwatch: TimeSpan = {hours: 0, minutes: 6, seconds: 0};
 
     const defaultHours = 0
     const defaultMinutes = 6;
@@ -61,44 +64,50 @@ export default function Home() {
     let [minutes, setMinutes] = useState<number>(defaultMinutes);
     let [seconds, setSeconds] = useState<number>(defaultSeconds);
 
-    const navigateToRemainingTimer = async (id: string) => await router.push(`/remaining/${id}`, undefined, {shallow: true});
-    const navigateToElapsedTimer = async (id: string) => await router.push(`/elapsed/${id}`, undefined, {shallow: true});
+    const navigateToCountdown = async (id: string) => await router.push(`/remaining/${id}`, undefined, {shallow: true});
+    const navigateToStopwatch = async (id: string) => await router.push(`/elapsed/${id}`, undefined, {shallow: true});
 
     const createNewStopwatch = async (id: string, end: TimeSpan, format: StopwatchFormat, type: StopwatchType) => {
         await createStopwatch({variables: {input: {id, format, ...end}}})
+        // await fetchStopwatches({refetchWritePolicy: "overwrite"})
         if (type === "Remaining")
-            await navigateToRemainingTimer(id);
+            await navigateToCountdown(id);
         else
-            await navigateToElapsedTimer(id);
+            await navigateToStopwatch(id);
     }
 
     const stopwatchConfigs = sortBy(data?.stopwatchConfigs ?? [], "id");
-    const currentTimerIds: string[] = stopwatchConfigs.map(c => c.id);
-    const hasStopwatches = currentTimerIds.length > 0;
+    const currentStopwatchIds: string[] = stopwatchConfigs.map(c => c.id);
+    const hasStopwatches = currentStopwatchIds.length > 0;
 
-    const nextTimerIds = difference(AllowedTimerIds, currentTimerIds).sort();
-    const nextTimerId = nextTimerIds.length > 0 ? nextTimerIds[0] : "";
+    const nextStopwatchIds = difference(AllowedStopwatchIds, currentStopwatchIds).sort();
+    const nextStopwatchId = nextStopwatchIds.length > 0 ? nextStopwatchIds[0] : "";
 
     return (<Grid container direction={"column"} alignItems={"center"} justifyContent={"center"} rowGap={2}>
         {!hasStopwatches &&
-            <Typography>{"There are currently no existing stopwatches. Click 'Add new timer' to create a new one"}</Typography>}
+            <Typography>{"Click one of the 'Add new' to create a stopwatch"}</Typography>}
 
         {stopwatchConfigs.map((sc) => (
-            <Grid key={sc.id} item container direction={"row"} alignItems={"center"} justifyContent={"center"} columnGap={1}>
-                    <Typography>{`Timer ${sc.id} - ${formatFor(sc.stopwatchFormat, {hours: sc.hours, minutes: sc.minutes, seconds: sc.seconds})}`}</Typography>
-                    <Button variant={"contained"} key={`go-to-remaining-timer-button-${sc.id}`}
-                            onClick={() => navigateToRemainingTimer(sc.id)}>{`Up`}</Button>
-                    <Button variant={"contained"} key={`go-to-elapsed-timer-button-${sc.id}`}
-                            onClick={() => navigateToElapsedTimer(sc.id)}>{`Down`}</Button>
+            <Grid key={sc.id} item container direction={"row"} alignItems={"center"} justifyContent={"center"}
+                  columnGap={1}>
+                <Typography>{`Stopwatch ${sc.id} - ${formatFor("HOURS", {
+                    hours: sc.hours,
+                    minutes: sc.minutes,
+                    seconds: sc.seconds
+                })}`}</Typography>
+                <Button variant={"contained"} key={`go-to-stopwatch-button-${sc.id}`}
+                        onClick={() => navigateToStopwatch(sc.id)}>{`Up`}</Button>
+                <Button variant={"contained"} key={`go-to-countdown-button-${sc.id}`}
+                        onClick={() => navigateToCountdown(sc.id)}>{`Down`}</Button>
             </Grid>
         ))}
 
-        {nextTimerId !== "" &&
+        {nextStopwatchId !== "" &&
             <Grid pt={5} container alignItems={"center"} direction={"column"} rowGap={3} justifyContent={"center"}>
-                <Button key={"create-new-minutes-timer"}
-                        onClick={() => createNewStopwatch(nextTimerId, defaultLeadTimer, "MINUTES", "Remaining")}>{"Add new lead climb stopwatch (6 minutes)"}</Button>
-                <Button key={"create-new-hours-timer"}
-                        onClick={() => createNewStopwatch(nextTimerId, defaultBoulderTimer, "HOURS", "Remaining")}>{"Add new boulder stopwatch (2,5 hours)"}</Button>
+                <Button key={"create-new-minutes-stopwatch"}
+                        onClick={() => createNewStopwatch(nextStopwatchId, defaultLeadStopwatch, "MINUTES", "Remaining")}>{"Add new lead climb stopwatch (6 minutes)"}</Button>
+                <Button key={"create-new-hours-stopwatch"}
+                        onClick={() => createNewStopwatch(nextStopwatchId, defaultBoulderStopwatch, "HOURS", "Remaining")}>{"Add new boulder stopwatch (2,5 hours)"}</Button>
                 <Grid container direction={"row"} alignItems={"center"} justifyContent={"center"}>
                     <Grid container item direction={"column"} alignItems={"center"}>
                         <TextField id="hours" label="Hours" type={"number"} variant={"filled"}
@@ -111,12 +120,12 @@ export default function Home() {
                                    onChange={(v) => setSeconds(+v.target.value)}
                                    value={seconds}/>
                     </Grid>
-                    <Button key={"create-new-timer"}
-                            onClick={() => hours > 0 ? createNewStopwatch(nextTimerId, {
+                    <Button key={"create-new-stopwatch"}
+                            onClick={() => hours > 0 ? createNewStopwatch(nextStopwatchId, {
                                 hours,
                                 minutes,
                                 seconds
-                            }, "HOURS", "Remaining") : createNewStopwatch(nextTimerId, {
+                            }, "HOURS", "Remaining") : createNewStopwatch(nextStopwatchId, {
                                 hours,
                                 minutes,
                                 seconds
@@ -129,19 +138,19 @@ export default function Home() {
 
 export const getServerSideProps = async (
     context: GetServerSidePropsContext
-  ) => {
-    const session = await getSession({ req: context.req });
-  
+) => {
+    const session = await getSession({req: context.req});
+
     if (!session) {
-      return {
-        redirect: {
-          destination: '/api/auth/signin',
-          permanent: false,
-        },
-      };
+        return {
+            redirect: {
+                destination: '/api/auth/signin',
+                permanent: false,
+            },
+        };
     }
-  
+
     return {
-      props: { session },
+        props: {session},
     };
-  };
+};

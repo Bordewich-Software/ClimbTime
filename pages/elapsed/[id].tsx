@@ -27,7 +27,7 @@ export default function Id() {
         }
     });
 
-    if (loading)
+    if (loading && !error)
         return (<Typography>{"Loading..."}</Typography>)
 
     if (error)
@@ -46,5 +46,5 @@ export default function Id() {
         }
     }
 
-    return (<StopwatchComponent stopwatch={stopwatch} timerState={data?.elapsedTime.timerState}/>)
+    return (<StopwatchComponent stopwatch={stopwatch} stopwatchState={data?.elapsedTime.timerState}/>)
 }
